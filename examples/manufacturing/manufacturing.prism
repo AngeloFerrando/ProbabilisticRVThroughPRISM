@@ -1,0 +1,120 @@
+dtmc
+
+module event_selection
+
+	status_product_1: [0..3] init 0;
+	status_product_2: [0..3] init 0;
+	// 0 stands for that the product is unaddressed
+	// 1 stands for that the product is being addressed
+	// 2 stands for that the product is being addressed with success 
+	// 3 stands for that the product is being addressed in failure
+	
+	// the first action is to choose between which product to address if they are all unaddressed (the preference is modelled probabilistically)
+	// for simplicity, i randomly choose 40% for product 1 vs 60% for product 2 (implying product 2 is more urgent than product 1)
+	[choose_between_product1_and_product2] status_product_1=0 & status_product_2=0 -> 0.4:(status_product_1'=1) + 0.6:(status_product_2'=1);
+
+	// the secend action is to choose product 1 when the product 2 is not unaddressed (i.e. status number 1-3)
+	// the type of expression is one of the reasons I do not particually like PRISM module reactive languages, which feels rather forced and too explicit. :) 
+	[choose_product1] status_product_1=0 & (status_product_2=1 | status_product_2=2 | status_product_2=3) -> (status_product_1'=1);
+
+	// the third action is to choose product 2 when the product 1 is being addressed
+	[choose_product2] (status_product_1=1 | status_product_1=2 | status_product_1=3) & status_product_2=0 -> (status_product_2'=1);
+
+
+	// the final part is to update the status of product based on the action effects for each product (which is specified in the final module). 
+	// be careful that we need status_product_1=1 as condition so we do not jump from status_product_1=0 to status_product_1=2/3
+	[update_success_product_1] action_effect_product_1=1 & status_product_1=1 -> (status_product_1'=2); 
+	[update_failure_product_1] action_effect_product_1=2 & status_product_1=1 -> (status_product_1'=3); 
+
+	[update_success_product_2] action_effect_product_2=1 & status_product_2=1 -> (status_product_2'=2); 
+	[update_failure_product_2] action_effect_product_2=2 & status_product_2=1 -> (status_product_2'=3); 
+
+
+endmodule
+
+
+
+
+module plan_selection
+
+	plan_product_1: [0..2] init 0;
+	plan_product_2: [0..2] init 0;
+	// 0 stands for that there is no plan selected to address a given product yet
+	// 1 stands for that a plan using the cheap bag is selected to address a given product
+	// 2 stands for that a plan using the expensive bag is selected to address a given product
+
+	// the first action is to choose which bag for product 1 to address when a product status is shown to be "being addressed"
+	// for simplicity, i randomly choose 70% for cheap expensive bag plan vs 30% for expensive bag plan for product 1
+	[choose_plan_product_1] status_product_1=1 & plan_product_1=0 -> 0.7:(plan_product_1'=1) + 0.3:(plan_product_1'=2);
+
+	// the second action is to choose which bag for product 2 to address when a product status is shown to be "being addressed"
+	// for simplicity, i randomly choose 80% for cheap bag plan vs 20% for expensive bag plan for product 2
+	// the changed probability also implies for different product, the preference to choose different products can be different
+	// note: it can be easily adjusted to have different bags with different probabilistic preference specifically for each type of products if needed 
+	[choose_plan_product_2] status_product_2=1 & plan_product_2=0 -> 0.8:(plan_product_2'=1) + 0.2:(plan_product_2'=2);
+
+endmodule
+
+
+
+
+module action_execution
+
+	action_effect_product_1: [0..2] init 0;
+	action_effect_product_2: [0..2] init 0;
+	// 0 stands for that no effect yet
+	// 1 stands for that successful intended effect
+	// 2 stands for that failed intended effect 
+	
+	// for simplicity, each plan only has one action but we can gradually to model a sequence of actions with each probabilistic effects.
+
+	// cheap bag for product 1 has 80% success rate, 20% failure rate
+	[action_product_1_cheap_bag]         plan_product_1=1 & action_effect_product_1=0-> 0.8:(action_effect_product_1'=1) + 0.2:(action_effect_product_1'=2);
+	// expensive bag for product 1 has 95% success rate, 5% failure rate
+	[action_product_1_expensive_bag]     plan_product_1=2 & action_effect_product_1=0-> 0.95:(action_effect_product_1'=1) + 0.05:(action_effect_product_1'=2);
+
+	// cheap bag for product 2 has 85% success rate, 15% failure rate
+	[action_product_2_cheap_bag]         plan_product_2=1 & action_effect_product_2=0-> 0.85:(action_effect_product_2'=1) + 0.15:(action_effect_product_2'=2);
+	// expensive bag for product 2 has 97% success rate, 3% failure rate
+	[action_product_2_expensive_bag]     plan_product_2=2 & action_effect_product_2=0-> 0.97:(action_effect_product_2'=1) + 0.03:(action_effect_product_2'=2);
+
+
+
+
+endmodule
+
+// target state (all tasks complete)
+
+
+label "two_products_complete" = ((status_product_1=2) | (status_product_1=3)) & ((status_product_2=2) | (status_product_2=3));
+
+label "product_1_complete" = (status_product_1=2) | (status_product_1=3);
+
+label "product_1_success" = (status_product_1=2);
+
+label "product_1_failure" = (status_product_1=3);
+
+
+label "product_2_complete" = (status_product_2=2) | (status_product_2=3);
+
+label "product_2_success" = (status_product_2=2);
+
+label "product_2_failure" = (status_product_2=3);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
