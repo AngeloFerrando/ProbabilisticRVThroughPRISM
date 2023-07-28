@@ -1,6 +1,6 @@
 import sys
 import os
-from model import Monitor
+from monitor import Monitor
 from preprocessing import preprocessing
 
 def main():
