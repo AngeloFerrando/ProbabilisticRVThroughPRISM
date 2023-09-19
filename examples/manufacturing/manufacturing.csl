@@ -1,11 +1,1 @@
-P=? [F "two_products_complete"];
-P=? [F "product_1_complete"];
 P=? [F "product_1_success"];
-P=? [F "product_1_failure"];
-P=? [F "product_2_complete"];
-P=? [F "product_2_success"];
-P=? [F "product_2_failure"];
-P = ?[F "product_1_success" & "product_2_success"];
-P = ?[F "product_1_success" & "product_2_failure"];
-P = ?[F "product_1_failure" & "product_2_success"];
-P = ?[F "product_1_failure" & "product_2_failure"];
