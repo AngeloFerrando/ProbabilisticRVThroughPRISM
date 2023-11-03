@@ -1,0 +1,526 @@
+# s is a graph-based term-rewriting specification language to model a probabilistic system
+
+# its building block is called reaction rules that rewrite the left-hand-side terms to be the right-hand-side
+
+# a simple example of reaction rule that changes A to B can be specified as follows:
+
+# reac a_to_b = A -> B;
+
+# by default, the name of rules is low-key and the terms are capitalised. 
+
+# now I try to model the scenario of smart manufacturing
+
+# the first step is to declaim the terms we will be using and, again by default, it has to be captalised. 
+
+# in this case, we just now look at two products
+# in this version, I will firstly give you a verbose version so that you really understand how it works in intuitive way
+# in practice, we can use variable to have Product(n) where n can range from 1 - any integer to simply the modelling, but we will leave it for now.
+
+ctrl Product1 = 0;  
+ctrl Product2 = 0;  
+ 
+# the initial status of each product
+atomic ctrl Idle = 0; 
+
+# atomic ctrl Idle = 0 states that I declare an atomic term Idle that cannot be nested by another other terms, soon you will see what I mean by "being nested". 
+
+
+# the rest of status for each product 
+
+atomic ctrl SelectForProcess = 0;
+
+atomic ctrl BagSelected = 0;
+
+atomic ctrl PathSelected = 0;
+
+atomic ctrl Failure = 0;
+
+atomic ctrl ReadyforPathSelection = 0;
+
+atomic ctrl Success = 0;
+
+
+
+
+# three type of bags 
+
+atomic ctrl LowQualityBag = 0;
+
+atomic ctrl MediumQualityBag = 0;
+
+atomic ctrl HighQualityBag = 0;
+
+
+# three type of path for navigation 
+
+atomic ctrl NarrowPath = 0;
+
+atomic ctrl MediumPath = 0;
+
+atomic ctrl WidePath = 0;
+
+
+# extra tokens to record the rules applied for each product
+
+ctrl RuleApplied = 0;
+
+
+atomic ctrl RuleforProduct1Applied = 0;
+
+atomic ctrl RuleforProduct2Applied = 0;
+
+
+# the following is the set of reaction rules that specify the probabilistic nature of this scenario.
+
+
+# the following two reaction rules to model which product to select
+
+react select_product1_rule_1 =
+  Product1.Idle || RuleApplied.1 -[3]-> Product1.SelectForProcess || RuleApplied.RuleforProduct1Applied;
+
+react select_product1_rule_2 =
+  Product1.Idle || RuleApplied.RuleforProduct2Applied -[3]-> Product1.SelectForProcess || RuleApplied.RuleforProduct1Applied;
+
+react select_product2_rule_1 =
+  Product2.Idle || RuleApplied.1 -[3]-> Product2.SelectForProcess || RuleApplied.RuleforProduct2Applied;
+
+react select_product2_rule_2 =
+  Product2.Idle || RuleApplied.RuleforProduct1Applied -[3]-> Product2.SelectForProcess || RuleApplied.RuleforProduct2Applied;
+
+# as you can say that I nest the Idle status under term Product1 to express that "Product1 is Idle".
+# to select a product, it means I replace the Idle term with SelectForProcess. 
+# if we have both Product1.Idle and Product2.Idle, then both reaction rule select_product1 and select_product2 can be applied
+# and indeed, this is where the branching comes in. The probability of applying them is decided by the weight. 
+# here you can say the weight is 3 from Product1.Idle to Product1.SelectForProcess;
+# and 7 from Product2.Idle to Product2.SelectForProcess;
+# you can change the number in -[3]-> and -[7]-> to get the probability you want. The tool will do normalisation for you for free.
+
+
+
+# the following three reaction rules to model which type of bags to select for product 1
+# as you can say that we model the preference probabilistically
+# so we will have 10% change to select LowQualityBag, 60% MediumQualityBag, and 30% HighQualityBag
+react select_lowqualitybag_product1_rule_1 =
+  Product1.SelectForProcess || RuleApplied.RuleforProduct1Applied -[1]-> Product1.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+react select_lowqualitybag_product1_rule_2 =
+  Product1.SelectForProcess || RuleApplied.RuleforProduct2Applied -[1]-> Product1.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+react select_mediumqualitybag_product1_rule_1 =
+  Product1.SelectForProcess || RuleApplied.RuleforProduct1Applied -[6]-> Product1.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+react select_mediumqualitybag_product1_rule_2 =
+  Product1.SelectForProcess || RuleApplied.RuleforProduct2Applied -[6]-> Product1.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+react select_highqualitybag_product1_rule_1 =
+  Product1.SelectForProcess || RuleApplied.RuleforProduct1Applied -[3]-> Product1.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+react select_highqualitybag_product1_rule_2 =
+  Product1.SelectForProcess || RuleApplied.RuleforProduct2Applied -[3]-> Product1.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+
+
+
+# the following three reaction rules to model which type of bags to select for product 2
+react select_lowqualitybag_product2_rule_1 =
+  Product2.SelectForProcess || RuleApplied.RuleforProduct2Applied -[1]-> Product2.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+react select_lowqualitybag_product2_rule_2 =
+  Product2.SelectForProcess || RuleApplied.RuleforProduct1Applied -[1]-> Product2.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+react select_mediumqualitybag_product2_rule_1 =
+  Product2.SelectForProcess || RuleApplied.RuleforProduct2Applied -[6]-> Product2.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+react select_mediumqualitybag_product2_rule_2 =
+  Product2.SelectForProcess || RuleApplied.RuleforProduct1Applied -[6]-> Product2.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+react select_highqualitybag_product2_rule_1 =
+  Product2.SelectForProcess || RuleApplied.RuleforProduct2Applied -[3]-> Product2.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+react select_highqualitybag_product2_rule_2 =
+  Product2.SelectForProcess || RuleApplied.RuleforProduct1Applied -[6]-> Product2.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+# the following 6 rules to model the failure effect of each type of bag for product 1
+
+# the first two rules failure_lowqualitybag_product1 and nonfailure_lowqualitybag_product1 models the situation
+# that choosing LowQualityBag will results in 50% change of breaking and another 50% of non-breaking
+
+react failure_lowqualitybag_product1_rule_1  =
+  Product1.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct1Applied -[5]-> Product1.(LowQualityBag | Failure) || RuleApplied.RuleforProduct1Applied;
+
+react failure_lowqualitybag_product1_rule_2  =
+  Product1.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct2Applied -[5]-> Product1.(LowQualityBag | Failure) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_lowqualitybag_product1_rule_1 =
+  Product1.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct1Applied -[5]-> Product1.(ReadyforPathSelection | LowQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_lowqualitybag_product1_rule_2 =
+  Product1.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct2Applied  -[5]-> Product1.(ReadyforPathSelection | LowQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+
+# the following two rules failure_mediumqualitybag_product1 and nonfailure_mediumqualitybag_product1 models the situation
+# that choosing MediumQualityBag will results in 30% change of breaking and another 70% of non-breaking
+
+react failure_mediumqualitybag_product1_rule_1  =
+  Product1.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct1Applied -[3]-> Product1.(MediumQualityBag | Failure) || RuleApplied.RuleforProduct1Applied;
+
+react failure_mediumqualitybag_product1_rule_2  =
+  Product1.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct2Applied -[3]-> Product1.(MediumQualityBag | Failure) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_mediumqualitybag_product1_rule_1 =
+  Product1.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct1Applied -[7]-> Product1.(ReadyforPathSelection | MediumQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_mediumqualitybag_product1_rule_2 =
+  Product1.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct2Applied  -[7]-> Product1.(ReadyforPathSelection | MediumQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+# the following two rules failure_highqualitybag_product1 and nonfailure_highqualitybag_product1 models the situation
+# that choosing HighQualityBag will results in 10% change of breaking and another 90% of non-breaking
+
+react failure_highqualitybag_product1_rule_1 =
+  Product1.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct1Applied -[1]-> Product1.(HighQualityBag | Failure) || RuleApplied.RuleforProduct1Applied;
+
+react failure_highqualitybag_product1_rule_2 =
+  Product1.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct2Applied -[1]-> Product1.(HighQualityBag | Failure) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_highqualitybag_product1_rule_1 =
+  Product1.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct1Applied -[9]-> Product1.(ReadyforPathSelection | HighQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_highqualitybag_product1_rule_2 =
+  Product1.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct2Applied -[9]-> Product1.(ReadyforPathSelection | HighQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+# the following 6 rules to model the failure effect of each type of bag for product 2
+
+react failure_lowqualitybag_product2_rule_1 =
+  Product2.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct2Applied -[5]-> Product2.(LowQualityBag | Failure) || RuleApplied.RuleforProduct2Applied;
+
+react failure_lowqualitybag_product2_rule_2 =
+  Product2.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct1Applied -[5]-> Product2.(LowQualityBag | Failure) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_lowqualitybag_product2_rule_1 =
+  Product2.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct2Applied -[5]-> Product2.(ReadyforPathSelection | LowQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_lowqualitybag_product2_rule_2 =
+  Product2.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct1Applied -[5]-> Product2.(ReadyforPathSelection | LowQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+react failure_mediumqualitybag_product2_rule_1 =
+  Product2.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct2Applied -[3]-> Product2.(MediumQualityBag | Failure) || RuleApplied.RuleforProduct2Applied;
+
+react failure_mediumqualitybag_product2_rule_2 =
+  Product2.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct1Applied -[3]-> Product2.(MediumQualityBag | Failure) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_mediumqualitybag_product2_rule_1 =
+  Product2.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct2Applied -[7]-> Product2.(ReadyforPathSelection | MediumQualityBag) || RuleApplied.RuleforProduct2Applied ;
+
+react nonfailure_mediumqualitybag_product2_rule_2 =
+  Product2.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct1Applied -[7]-> Product2.(ReadyforPathSelection | MediumQualityBag) || RuleApplied.RuleforProduct2Applied ;
+
+react failure_highqualitybag_product2_rule_1 =
+  Product2.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct2Applied -[1]-> Product2.(HighQualityBag | Failure) || RuleApplied.RuleforProduct2Applied;
+
+react failure_highqualitybag_product2_rule_2 =
+  Product2.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct1Applied -[1]-> Product2.(HighQualityBag | Failure) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_highqualitybag_product2_rule_1 =
+  Product2.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct2Applied -[9]-> Product2.(ReadyforPathSelection | HighQualityBag) || RuleApplied.RuleforProduct2Applied ;
+
+react nonfailure_highqualitybag_product2_rule_2 =
+  Product2.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct1Applied -[9]-> Product2.(ReadyforPathSelection | HighQualityBag) || RuleApplied.RuleforProduct2Applied ;
+
+
+
+# the following three rules to model the preference selection of path for product 1
+# as same, you can say that we model the preference selection of path probabilistically
+
+react select_narrowpath_product1_rule_1 =
+  Product1.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct1Applied -[3]-> Product1.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct1Applied;
+
+react select_narrowpath_product1_rule_2 =
+  Product1.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct2Applied -[3]-> Product1.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct1Applied;
+
+react select_mediumpath_product1_rule_1 =
+  Product1.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct1Applied -[3]-> Product1.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct1Applied;
+
+react select_mediumpath_product1_rule_2 =
+  Product1.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct2Applied -[3]-> Product1.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct1Applied;
+
+react select_widepath_product1_rule_1 =
+  Product1.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct1Applied -[4]-> Product1.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct1Applied;
+
+react select_widepath_product1_rule_2 =
+  Product1.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct2Applied -[4]-> Product1.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct1Applied;
+
+# the following three rules to model the preference selection of path for product 2
+
+react select_narrowpath_product2_rule_1 =
+  Product2.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct2Applied -[3]-> Product2.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct2Applied;
+
+react select_narrowpath_product2_rule_2 =
+  Product2.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct1Applied -[3]-> Product2.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct2Applied;
+
+react select_mediumpath_product2_rule_1 =
+  Product2.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct2Applied -[3]-> Product2.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct2Applied;
+
+react select_mediumpath_product2_rule_2 =
+  Product2.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct1Applied -[3]-> Product2.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct2Applied;
+
+react select_widepath_product2_rule_1 =
+  Product2.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct2Applied -[4]-> Product2.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct2Applied;
+
+react select_widepath_product2_rule_2 =
+  Product2.(ReadyforPathSelection | id) || RuleApplied.RuleforProduct1Applied -[4]-> Product2.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct2Applied;
+
+
+
+# the following six rules to model the failure effects of the selection of path for product 1
+
+# the first two rules failure_effect_narrowpath_product1 and nonfailure_effect_narrowpath_product1 model the situations that
+# selecting NarrowPath will result in 40% change of failure (e.g. fell for some reason), and 60% not failure. 
+
+react failure_effect_narrowpath_product1_rule_1 =
+  Product1.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct1Applied -[4]-> Product1.(NarrowPath | Failure | id) || RuleApplied.RuleforProduct1Applied; 
+
+react failure_effect_narrowpath_product1_rule_2 =
+  Product1.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct2Applied -[4]-> Product1.(NarrowPath | Failure | id) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_effect_narrowpath_product1_rule_1 =
+  Product1.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct1Applied -[6]-> Product1.(NarrowPath | Success | id) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_effect_narrowpath_product1_rule_2 =
+  Product1.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct2Applied -[6]-> Product1.(NarrowPath | Success | id) || RuleApplied.RuleforProduct1Applied;
+
+react failure_effect_mediumpath_product1_rule_1 =
+  Product1.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct1Applied -[2]-> Product1.(MediumPath | Failure | id) || RuleApplied.RuleforProduct1Applied;
+
+react failure_effect_mediumpath_product1_rule_2 =
+  Product1.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct2Applied -[2]-> Product1.(MediumPath | Failure | id) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_effect_mediumpath_product1_rule_1 =
+  Product1.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct1Applied -[8]-> Product1.(MediumPath | Success | id) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_effect_mediumpath_product1_rule_2 =
+  Product1.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct2Applied -[8]-> Product1.(MediumPath | Success | id) || RuleApplied.RuleforProduct1Applied;
+
+
+react failure_effect_widepath_product1_rule_1 =
+  Product1.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct1Applied -[1]-> Product1.(WidePath | Failure | id) || RuleApplied.RuleforProduct1Applied;
+
+react failure_effect_widepath_product1_rule_2 =
+  Product1.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct2Applied -[1]-> Product1.(WidePath | Failure | id) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_effect_widepath_product1_rule_1 =
+  Product1.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct1Applied -[9]-> Product1.(WidePath | Success | id) || RuleApplied.RuleforProduct1Applied;
+
+react nonfailure_effect_widepath_product1_rule_2 =
+  Product1.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct2Applied -[9]-> Product1.(WidePath | Success | id) || RuleApplied.RuleforProduct1Applied;
+
+# the following six rules to model the failure effects of the selection of path for product 2
+
+
+react failure_effect_narrowpath_product2_rule_1 =
+  Product2.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct2Applied -[4]-> Product2.(NarrowPath | Failure | id) || RuleApplied.RuleforProduct2Applied;
+
+react failure_effect_narrowpath_product2_rule_2 =
+  Product2.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct1Applied -[4]-> Product2.(NarrowPath | Failure | id) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_effect_narrowpath_product2_rule_1 =
+  Product2.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct2Applied -[6]-> Product2.(NarrowPath | Success | id) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_effect_narrowpath_product2_rule_2 =
+  Product2.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct1Applied -[6]-> Product2.(NarrowPath | Success | id) || RuleApplied.RuleforProduct2Applied;
+
+react failure_effect_mediumpath_product2_rule_1 =
+  Product2.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct2Applied -[2]-> Product2.(MediumPath | Failure | id) || RuleApplied.RuleforProduct2Applied;
+
+react failure_effect_mediumpath_product2_rule_2 =
+  Product2.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct1Applied -[2]-> Product2.(MediumPath | Failure | id) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_effect_mediumpath_product2_rule_1 =
+  Product2.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct2Applied -[8]-> Product2.(MediumPath | Success | id) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_effect_mediumpath_product2_rule_2 =
+  Product2.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct1Applied -[8]-> Product2.(MediumPath | Success | id) || RuleApplied.RuleforProduct2Applied;
+
+react failure_effect_widepath_product2_rule_1 =
+  Product2.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct2Applied -[1]-> Product2.(WidePath | Failure | id) || RuleApplied.RuleforProduct2Applied;
+
+react failure_effect_widepath_product2_rule_2 =
+  Product2.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct1Applied -[1]-> Product2.(WidePath | Failure | id) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_effect_widepath_product2_rule_1 =
+  Product2.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct2Applied -[9]-> Product2.(WidePath | Success | id) || RuleApplied.RuleforProduct2Applied;
+
+react nonfailure_effect_widepath_product2_rule_2 =
+  Product2.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct1Applied -[9]-> Product2.(WidePath | Success | id) || RuleApplied.RuleforProduct2Applied;
+
+
+
+# the following is the pattern that I want to model check
+
+big select_product1 = Product1.SelectForProcess || RuleApplied.RuleforProduct1Applied;
+
+big select_product2 = Product2.SelectForProcess || RuleApplied.RuleforProduct2Applied;
+
+big select_lowqualitybag_product1 = Product1.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+big select_mediumqualitybag_product1 = Product1.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+big select_highqualitybag_product1 = Product1.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct1Applied;
+
+big select_lowqualitybag_product2 = Product2.(BagSelected | LowQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+big select_mediumqualitybag_product2 = Product2.(BagSelected | MediumQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+big select_highqualitybag_product2 = Product2.(BagSelected | HighQualityBag) || RuleApplied.RuleforProduct2Applied;
+
+big select_narrowpath_product1 = Product1.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct1Applied;
+
+big select_mediumpath_product1 = Product1.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct1Applied;
+
+big select_widepath_product1 = Product1.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct1Applied;
+
+big select_narrowpath_product2 = Product2.(PathSelected | NarrowPath | id) || RuleApplied.RuleforProduct2Applied;
+
+big select_mediumpath_product2 = Product2.(PathSelected | MediumPath | id) || RuleApplied.RuleforProduct2Applied;
+
+big select_widepath_product2 = Product2.(PathSelected | WidePath | id) || RuleApplied.RuleforProduct2Applied;
+
+# the initial state is that we have two products initially
+big s0 = Product1.Idle || Product2.Idle || RuleApplied.1;
+big s1 = Product1.Idle;
+big s2 = Product2.Idle;
+
+begin pbrs
+
+  init s0;
+  
+
+  rules = [ 
+
+      {
+       select_product1_rule_1,
+       select_product1_rule_2,
+       select_product2_rule_1,
+       select_product2_rule_2,
+       select_lowqualitybag_product1_rule_1,
+       select_lowqualitybag_product1_rule_2,
+       select_mediumqualitybag_product1_rule_1,
+       select_mediumqualitybag_product1_rule_2,       
+       select_highqualitybag_product1_rule_1,
+       select_highqualitybag_product1_rule_2,       
+       select_lowqualitybag_product2_rule_1,
+       select_lowqualitybag_product2_rule_2,
+       select_mediumqualitybag_product2_rule_1,
+       select_mediumqualitybag_product2_rule_2,
+       select_highqualitybag_product2_rule_1,
+       select_highqualitybag_product2_rule_2,
+       failure_lowqualitybag_product1_rule_1,
+       failure_lowqualitybag_product1_rule_2,
+       nonfailure_lowqualitybag_product1_rule_1,
+       nonfailure_lowqualitybag_product1_rule_2,
+       failure_mediumqualitybag_product1_rule_1,
+       failure_mediumqualitybag_product1_rule_2,
+       nonfailure_mediumqualitybag_product1_rule_1,
+       nonfailure_mediumqualitybag_product1_rule_2,
+       failure_highqualitybag_product1_rule_1,
+       failure_highqualitybag_product1_rule_2,
+       nonfailure_highqualitybag_product1_rule_1,
+       nonfailure_highqualitybag_product1_rule_2,
+       failure_lowqualitybag_product2_rule_1,
+       failure_lowqualitybag_product2_rule_2,
+       nonfailure_lowqualitybag_product2_rule_1,
+       nonfailure_lowqualitybag_product2_rule_2,
+       failure_mediumqualitybag_product2_rule_1,
+       failure_mediumqualitybag_product2_rule_2,
+       nonfailure_mediumqualitybag_product2_rule_1,
+       nonfailure_mediumqualitybag_product2_rule_2,
+       failure_highqualitybag_product2_rule_1,
+       failure_highqualitybag_product2_rule_2,
+       nonfailure_highqualitybag_product2_rule_1,
+       nonfailure_highqualitybag_product2_rule_2,
+       select_narrowpath_product1_rule_1,
+       select_narrowpath_product1_rule_2,
+       select_mediumpath_product1_rule_1,
+       select_mediumpath_product1_rule_2,
+       select_widepath_product1_rule_1,
+       select_widepath_product1_rule_2,
+       select_narrowpath_product2_rule_1,
+       select_narrowpath_product2_rule_2,
+       select_mediumpath_product2_rule_1,
+       select_mediumpath_product2_rule_2,
+       select_widepath_product2_rule_1,
+       select_widepath_product2_rule_2,
+       failure_effect_narrowpath_product1_rule_1,
+       failure_effect_narrowpath_product1_rule_2,
+       nonfailure_effect_narrowpath_product1_rule_1,
+       nonfailure_effect_narrowpath_product1_rule_2,
+       failure_effect_mediumpath_product1_rule_1,
+       failure_effect_mediumpath_product1_rule_2,
+       nonfailure_effect_mediumpath_product1_rule_1,
+       nonfailure_effect_mediumpath_product1_rule_2,
+       failure_effect_widepath_product1_rule_1,
+       failure_effect_widepath_product1_rule_2,
+       nonfailure_effect_widepath_product1_rule_1,
+       nonfailure_effect_widepath_product1_rule_2,
+       failure_effect_narrowpath_product2_rule_1,
+       failure_effect_narrowpath_product2_rule_2,
+       nonfailure_effect_narrowpath_product2_rule_1,
+       nonfailure_effect_narrowpath_product2_rule_2,
+       failure_effect_mediumpath_product2_rule_1,
+       failure_effect_mediumpath_product2_rule_2,
+       nonfailure_effect_mediumpath_product2_rule_1,
+       nonfailure_effect_mediumpath_product2_rule_2,
+       failure_effect_widepath_product2_rule_1,
+       failure_effect_widepath_product2_rule_2,
+       nonfailure_effect_widepath_product2_rule_1,
+       nonfailure_effect_widepath_product2_rule_2
+       } 
+
+       ];
+
+       preds = {
+       select_product1,
+       select_product2,
+       select_lowqualitybag_product1,
+       select_mediumqualitybag_product1,
+       select_highqualitybag_product1,
+       select_lowqualitybag_product2,
+       select_mediumqualitybag_product2,
+       select_highqualitybag_product2,
+       select_narrowpath_product1,
+       select_mediumpath_product1,
+       select_widepath_product1,
+       select_narrowpath_product2,
+       select_mediumpath_product2,
+       select_widepath_product2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       };
+
+end

@@ -18,11 +18,21 @@ def main():
         monitor = Monitor(sys.argv[1].replace('.prism', '_instr.sta'), sys.argv[1].replace('.prism', '_instr.tra'), sys.argv[1].replace('.prism', '.csl'))  
     else:
         os.system('../bigrapher/bigrapher full -p ' + sys.argv[1].replace('.big', '.tra') + ' -l ' + sys.argv[1].replace('.big', '.csl') + ' --solver=MCARD -M 5000 ' + sys.argv[1])
+        with open(sys.argv[2], 'r') as file:
+            prop = file.read()
+        with open(sys.argv[1].replace('.big', '.csl'), 'a') as file:
+            file.write(prop)
         monitor = Monitor(None, sys.argv[1].replace('.big', '.tra'), sys.argv[1].replace('.big', '.csl'))  
-        monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra'))
-        monitor.next(set(['select_product_1=1']))
-        monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra'))
-    
+        # monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra'))
+        print(monitor.next(set(['select_product_1=1'])))
+        # monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra'))
+        print(monitor.next(set(['select_lowqualitybag_product_1=1'])))
+        # monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra'))
+        print(monitor.next(set(['select_product_2=1', 'select_lowqualitybag_product_1=1'])))
+        # monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra')) 
+        print(monitor.next(set(['select_highqualitybag_product_2=1', 'select_lowqualitybag_product_1=1'])))
+        # monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra'))
+        
     # monitor.to_files(sys.argv[1].replace('.prism', '_instr1.sta'), sys.argv[1].replace('.prism', '_instr1.tra')) 
     # monitor.next(set(['choose_between_product1_and_product2=1', 'status_product_2=1']))
     # monitor.to_files(sys.argv[1].replace('.prism', '_instr1.sta'), sys.argv[1].replace('.prism', '_instr1.tra'))

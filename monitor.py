@@ -1,3 +1,6 @@
+import copy
+import os
+
 class Monitor:
     def __init__(self, file_states, file_transitions, file_properties):
         self.__state_vars = []
@@ -6,6 +9,8 @@ class Monitor:
         self.__file_properties = file_properties
         self.__initial_states = set(['0'])
         if self.__states: # PRISM
+            self.__kind = 'prism'
+            # extract the atomic propositions that hold in states from the STA file
             with open(file_states, 'r') as file:
                 first_line = file.readline()
                 self.__state_vars = first_line.replace('(', '').replace(')', '').replace('\n', '').split(',')
@@ -15,6 +20,7 @@ class Monitor:
                     for el in line.split(':')[1].replace('(', '').replace(')', '').replace('\n', '').split(','):
                         self.__states[line.split(':')[0]].add((self.__state_vars[i], el))
                         i += 1
+            # extract the transitions from the TRA file
             with open(file_transitions, 'r') as file:
                 file.readline() # discard first line
                 for line in file.readlines():
@@ -25,6 +31,8 @@ class Monitor:
                         self.__transitions[line[0]][','.join([e + '=' + v for (e,v) in self.__states[line[1]]])] = set()
                     self.__transitions[line[0]][','.join([e + '=' + v for (e,v) in self.__states[line[1]]])].add((line[1], float(line[2])))
         else: # BIGRAPHER
+            self.__kind = 'bigrapher'
+            # extract the atomic propositions that hold in states from the CSL file
             with open(file_properties, 'r') as file:
                 for line in file.readlines():
                     line = (line[:line.index('=')], line[line.index('=')+1:])
@@ -36,6 +44,7 @@ class Monitor:
                         if state not in self.__states:
                             self.__states[state] = set()
                         self.__states[state].add((event, '1'))
+            # extract the transitions from the TRA file
             with open(file_transitions, 'r') as file:
                 file.readline() # discard first line
                 for line in file.readlines():
@@ -48,20 +57,22 @@ class Monitor:
                         self.__transitions[line[0]] = {}
                     if ','.join([e + '=' + v for (e,v) in self.__states[line[1]]]) not in self.__transitions[line[0]]:
                         self.__transitions[line[0]][','.join([e + '=' + v for (e,v) in self.__states[line[1]]])] = set()
+                    # the non-determinism is only for the empty event (the events of our interest are deterministic w.r.t. the next state where they move to)
                     self.__transitions[line[0]][','.join([e + '=' + v for (e,v) in self.__states[line[1]]])].add((line[1], float(line[2])))
-            pippo=''
-
+            print(self.__transitions['0'])
+    # generate state and transition files from the monitor (the state file is only generated in case of PRISM)
     def to_files(self, file_states, file_transitions):
-        with open(file_states, 'w') as file:
-            file.write('(' + ','.join(self.__state_vars) + ')\n')
-            for state in self.__states:
-                file.write(state + ':' + '(')
-                l = []
-                for var in self.__state_vars:
-                    for (el, v) in self.__states[state]:
-                        if var == el:
-                            l.append(v)
-                file.write(','.join(l) + ')\n')
+        if self.__kind == 'prism':
+            with open(file_states, 'w') as file:
+                file.write('(' + ','.join(self.__state_vars) + ')\n')
+                for state in self.__states:
+                    file.write(state + ':' + '(')
+                    l = []
+                    for var in self.__state_vars:
+                        for (el, v) in self.__states[state]:
+                            if var == el:
+                                l.append(v)
+                    file.write(','.join(l) + ')\n')
         with open(file_transitions, 'w') as file:
             n_trans = 0
             for tr in self.__transitions:
@@ -77,21 +88,31 @@ class Monitor:
         # print(self.__transitions[self.__initial_state])
         new_initial_states = set(self.__initial_states)
         for initial_state in self.__initial_states:
+            print('Move from state ', initial_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[initial_state]]),' } hold')
             for ev in self.__transitions[initial_state]:
                 print('EV:', set([e for e in ev.split(',') if '=0' not in e]))
                 if event == set([e for e in ev.split(',') if '=0' not in e]):
                     new_initial_states.remove(initial_state)
-                    next_states = self.__transitions[initial_state][ev]
-                    for (next_state, _) in next_states:
-                        self.__transitions[initial_state][ev].remove((next_state, _))
+                    next_states = copy.deepcopy(self.__transitions[initial_state][ev])
+                    print(next_states)
+                    for (next_state, prob) in next_states:
+#                        print(next_state,prob)
+                        print('To the state ', next_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[next_state]]),' } hold')
+                        self.__transitions[initial_state][ev].remove((next_state, prob))
+
                         self.__transitions[initial_state][ev].add((next_state, 1.0))
                         new_initial_states.add(next_state)
                 else:
                     next_states = self.__transitions[initial_state][ev]
-                    for (aux, _) in next_states:
-                        self.__transitions[initial_state][ev].remove((aux, _))
+                    for (aux, prob) in next_states:
+                        self.__transitions[initial_state][ev].remove((aux, prob))
                         self.__transitions[initial_state][ev].add((aux, 0.0))
         self.__initial_states = new_initial_states
+        return self.check()
+    def check(self):
+        self.to_files('tmp.sta', 'tmp.tra')
+        result = os.popen('prism -importtrans tmp.tra {csl} -dtmc'.format(csl=self.__file_properties)).read()
+        return float(result[result.index('Result:')+8:result.index('(exact floating point)')])
 
 
                 

@@ -229,14 +229,31 @@ react nonfailure_effect_widepath_product2 =
 
 # the following is the pattern that I want to model check
 
-big product1_success = Product1.(id | Success);
-big product1_failure = Product1.(id | Failure);
+big product_1_success = Product1.(id | Success);
+big product_1_failure = Product1.(id | Failure);
 big select_product_1 = Product1.SelectForProcess;
+big select_lowqualitybag_product_1 = Product1.(BagSelected | LowQualityBag);
+big select_mediumqualitybag_product_1 = Product1.(BagSelected | MediumQualityBag);
+big select_highqualitybag_product_1 = Product1.(BagSelected | HighQualityBag);
+big ready_forpathselection_lowqualitybag_product_1 = Product1.(ReadyforPathSelection | LowQualityBag);
+big ready_forpathselection_mediumqualitybag_product_1 = Product1.(ReadyforPathSelection | MediumQualityBag);
+big ready_forpathselection_highqualitybag_product_1 = Product1.(ReadyforPathSelection | HighQualityBag);
+big select_narrowpath_product_1 = Product1.(PathSelected | NarrowPath | id);
+big select_mediumpath_product_1 = Product1.(PathSelected | MediumPath | id);
+big select_widepath_product_1 = Product1.(PathSelected | WidePath | id);
 
-
-big product2_success = Product2.(id | Success);
-big product2_failure = Product2.(id | Failure);
-
+big product_2_success = Product2.(id | Success);
+big product_2_failure = Product2.(id | Failure);
+big select_product_2 = Product2.SelectForProcess;
+big select_lowqualitybag_product_2 = Product2.(BagSelected | LowQualityBag);
+big select_mediumqualitybag_product_2 = Product2.(BagSelected | MediumQualityBag);
+big select_highqualitybag_product_2 = Product2.(BagSelected | HighQualityBag);
+big ready_forpathselection_lowqualitybag_product_2 = Product2.(ReadyforPathSelection | LowQualityBag);
+big ready_forpathselection_mediumqualitybag_product_2 = Product2.(ReadyforPathSelection | MediumQualityBag);
+big ready_forpathselection_highqualitybag_product_2 = Product2.(ReadyforPathSelection | HighQualityBag);
+big select_narrowpath_product_2 = Product2.(PathSelected | NarrowPath | id);
+big select_mediumpath_product_2 = Product2.(PathSelected | MediumPath | id);
+big select_widepath_product_2 = Product2.(PathSelected | WidePath | id);
 
 # the initial state is that we have two products initially
 big s0 = Product1.Idle || Product2.Idle;
@@ -293,6 +310,31 @@ begin pbrs
 
        ];
 
-       preds = {product1_success, product1_failure, product2_success, product2_failure, select_product_1};
+       preds = {
+        product_1_success, 
+        product_1_failure, 
+        product_2_success, 
+        product_2_failure, 
+        select_product_1,
+        select_product_2, 
+        select_lowqualitybag_product_1, 
+        select_mediumqualitybag_product_1,
+        select_highqualitybag_product_1,
+        ready_forpathselection_lowqualitybag_product_1,
+        ready_forpathselection_mediumqualitybag_product_1,
+        ready_forpathselection_highqualitybag_product_1,
+        select_narrowpath_product_1,
+        select_mediumpath_product_1,
+        select_widepath_product_1,
+        select_lowqualitybag_product_2, 
+        select_mediumqualitybag_product_2,
+        select_highqualitybag_product_2,
+        ready_forpathselection_lowqualitybag_product_2,
+        ready_forpathselection_mediumqualitybag_product_2,
+        ready_forpathselection_highqualitybag_product_2,
+        select_narrowpath_product_2,
+        select_mediumpath_product_2,
+        select_widepath_product_2
+        };
 
 end

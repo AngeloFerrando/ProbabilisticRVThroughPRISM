@@ -11,7 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["./examples/manufacturing/manufacturing_verbose.big"]
+            "args": ["./examples/manufacturing/manufacturing_verbose.big", "./examples/manufacturing/manufacturing.csl"]
         }
     ]
 }
