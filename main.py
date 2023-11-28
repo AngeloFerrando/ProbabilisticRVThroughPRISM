@@ -4,7 +4,7 @@ from monitor import Monitor
 from preprocessing import preprocessing
 
 def main():
-    storm = True if sys.argv[2] == 'storm' else False
+    storm = True if len(sys.argv) >= 3 and sys.argv[2] == 'storm' else False
     if sys.argv[1].endswith('.big'):
         big = True
     else:
@@ -18,7 +18,7 @@ def main():
         os.system('prism ' + sys.argv[1].replace('.prism', '_instr.prism') + ' -exportstates ' + sys.argv[1].replace('.prism', '_instr.sta') + ' -exporttrans ' + sys.argv[1].replace('.prism', '_instr.tra') + ' -exportlabels ' + sys.argv[1].replace('.prism', '_instr.lab'))
         monitor = Monitor(sys.argv[1].replace('.prism', '_instr.sta'), sys.argv[1].replace('.prism', '_instr.tra'), sys.argv[1].replace('.prism', '_instr.lab'), sys.argv[1].replace('.prism', '.csl'), storm)  
     else:
-        os.system('../bigrapher/bigrapher full -p ' + sys.argv[1].replace('.big', '.tra') + ' -l ' + sys.argv[1].replace('.big', '.csl') + ' --solver=MCARD -M 5000 ' + sys.argv[1])
+        os.system('bigrapher/bigrapher full -p ' + sys.argv[1].replace('.big', '.tra') + ' -l ' + sys.argv[1].replace('.big', '.csl') + ' --solver=MCARD -M 5000 ' + sys.argv[1])
         with open(sys.argv[2], 'r') as file:
             prop = file.read()
         with open(sys.argv[1].replace('.big', '.csl'), 'a') as file:
