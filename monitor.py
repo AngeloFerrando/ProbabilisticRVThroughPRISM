@@ -2,13 +2,15 @@ import copy
 import os
 
 class Monitor:
-    def __init__(self, file_states, file_transitions, file_properties):
+    def __init__(self, file_states, file_transitions, file_labels, file_properties, storm):
         self.__state_vars = []
         self.__states = {}
         self.__transitions = {}
+        self.__file_labels = file_labels
         self.__file_properties = file_properties
         self.__initial_states = set(['0'])
-        if self.__states: # PRISM
+        self.__storm = storm
+        if file_states: # PRISM
             self.__kind = 'prism'
             # extract the atomic propositions that hold in states from the STA file
             with open(file_states, 'r') as file:
@@ -82,7 +84,7 @@ class Monitor:
                 for ev in self.__transitions[tr]:
                     for tp in self.__transitions[tr][ev]:
                         file.write(tr + ' ' + tp[0] + ' ' + str(tp[1]) + '\n')
-    def next(self, event):
+    def next(self, event, simulated=False):
         # event = set(['event_' + e for e in event])
         print('EVENT:', event)
         # print(self.__transitions[self.__initial_state])
@@ -91,7 +93,8 @@ class Monitor:
             print('Move from state ', initial_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[initial_state]]),' } hold')
             for ev in self.__transitions[initial_state]:
                 print('EV:', set([e for e in ev.split(',') if '=0' not in e]))
-                if event == set([e for e in ev.split(',') if '=0' not in e]):
+                if simulated or event == set([e for e in ev.split(',') if '=0' not in e]):
+                    simulated = False
                     new_initial_states.remove(initial_state)
                     next_states = copy.deepcopy(self.__transitions[initial_state][ev])
                     print(next_states)
@@ -111,8 +114,23 @@ class Monitor:
         return self.check()
     def check(self):
         self.to_files('tmp.sta', 'tmp.tra')
-        result = os.popen('prism -importtrans tmp.tra {csl} -dtmc'.format(csl=self.__file_properties)).read()
-        return float(result[result.index('Result:')+8:result.index('(exact floating point)')])
+        if self.__kind == 'prism':
+            if self.__storm:
+                os.system('./prismlab_to_stormlab.sh {file_labels} {file_labels_storm}'.format(file_labels=self.__file_labels, file_labels_storm=self.__file_labels.replace('.lab', '_storm.lab')))
+                os.system('./prismtra_to_stormtra.sh tmp.tra tmp_storm.tra')
+                result = os.popen('storm --explicit tmp_storm.tra {file_labels} --prop {csl}'.format(file_labels=self.__file_labels.replace('.lab', '_storm.lab'), csl=self.__file_properties)).read()
+            else:
+                result = os.popen('prism -importtrans tmp.tra -importstates tmp.sta -importlabels {file_labels} {csl} -dtmc'.format(file_labels=self.__file_labels, csl=self.__file_properties)).read()
+        else:
+            result = os.popen('prism -importtrans tmp.tra {csl} -dtmc'.format(csl=self.__file_properties)).read()
+        print(result)
+        if self.__storm:
+            return float(result[result.index('Result (for initial states)')+28:result.index('Time for model checking')])
+        else:
+            return float(result[result.index('Result:')+8:result.index('(exact floating point)')])
+    def simulated_next(self, trace_length):
+        for i in range(0, trace_length):
+            self.next('None', simulated=True)
 
 
                 
