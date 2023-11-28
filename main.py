@@ -33,16 +33,6 @@ def main():
         # monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra')) 
         print(monitor.next(set(['select_highqualitybag_product_2=1', 'select_lowqualitybag_product_1=1'])))
         # monitor.to_files(sys.argv[1].replace('.big', '_mon.sta'), sys.argv[1].replace('.big', '_mon.tra'))
-        
-    # monitor.to_files(sys.argv[1].replace('.prism', '_instr1.sta'), sys.argv[1].replace('.prism', '_instr1.tra')) 
-    # monitor.next(set(['choose_between_product1_and_product2=1', 'status_product_2=1']))
-    # monitor.to_files(sys.argv[1].replace('.prism', '_instr1.sta'), sys.argv[1].replace('.prism', '_instr1.tra'))
-    # monitor.next(set(['choose_product1=1', 'status_product_1=1', 'status_product_2=1'])) 
-    # monitor.to_files(sys.argv[1].replace('.prism', '_instr2.sta'), sys.argv[1].replace('.prism', '_instr2.tra'))
-    # monitor.next(set(['choose_plan_product_1=1', 'choose_product1=1', 'status_product_1=1', 'plan_product_1=1', 'status_product_2=1'])) 
-    # monitor.to_files(sys.argv[1].replace('.prism', '_instr3.sta'), sys.argv[1].replace('.prism', '_instr3.tra'))
-    # monitor.next(set(['action_product_1_cheap_bag=1', 'status_product_2=1', 'plan_product_1=1', 'choose_plan_product_1=1', 'action_effect_product_1=1', 'choose_product1=1', 'status_product_1=1'])) 
-    # monitor.to_files(sys.argv[1].replace('.prism', '_instr4.sta'), sys.argv[1].replace('.prism', '_instr4.tra'))
 
 if __name__ == "__main__":
     main()
