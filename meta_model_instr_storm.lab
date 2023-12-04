@@ -1,0 +1,13 @@
+#DECLARATION
+label_7 label_6 label_5 label_4 label_3 label_2 label_1 label_0 deadlock init label_8 label_9 
+#END
+0 init label_0 
+1 label_1 
+2 label_2 
+3 label_3 
+4 deadlock label_4 
+5 deadlock label_5 
+6 deadlock label_6 
+7 deadlock label_7 
+8 deadlock label_8 
+9 deadlock label_9 

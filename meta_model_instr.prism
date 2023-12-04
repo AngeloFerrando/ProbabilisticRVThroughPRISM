@@ -1,0 +1,32 @@
+dtmc
+
+module meta
+	state : [0..9] init 0;
+	l3: [0..1] init 0;
+	l1: [0..1] init 0;
+	l2: [0..1] init 0;
+	l0: [0..1] init 0;
+
+	[l3] state=3 ->  0.5 :(state'=8) & (l3'=1) & (l1'=0) & (l2'=0) & (l0'=0) + 0.5 :(state'=9) & (l3'=1) & (l1'=0) & (l2'=0) & (l0'=0);
+
+	[l1] state=1 ->  1.0 :(state'=3) & (l3'=0) & (l1'=1) & (l2'=0) & (l0'=0);
+
+	[l2] state=2 ->  0.25 :(state'=4) & (l3'=0) & (l1'=0) & (l2'=1) & (l0'=0) + 0.25 :(state'=5) & (l3'=0) & (l1'=0) & (l2'=1) & (l0'=0) + 0.25 :(state'=6) & (l3'=0) & (l1'=0) & (l2'=1) & (l0'=0) + 0.25 :(state'=7) & (l3'=0) & (l1'=0) & (l2'=1) & (l0'=0);
+
+	[l0] state=0 ->  0.5 :(state'=1) & (l3'=0) & (l1'=0) & (l2'=0) & (l0'=1) + 0.5 :(state'=2) & (l3'=0) & (l1'=0) & (l2'=0) & (l0'=1);
+
+endmodule
+
+
+
+// Labels for states
+label "label_0" = (state=0);
+label "label_1" = (state=1);
+label "label_2" = (state=2);
+label "label_3" = (state=3);
+label "label_4" = (state=4);
+label "label_5" = (state=5);
+label "label_6" = (state=6);
+label "label_7" = (state=7);
+label "label_8" = (state=8);
+label "label_9" = (state=9);

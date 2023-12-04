@@ -11,8 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            // "args": ["./examples/manufacturing/manufacturing_verbose.big", "./examples/manufacturing/manufacturing.csl"]
-            "args": ["2", "5", "1", "10", "12", "1"]
+            "args": ["./examples/manufacturing/manufacturing.prism", "./examples/manufacturing/manufacturing.csl", "./examples/manufacturing/trace.txt"]
         }
     ]
 }

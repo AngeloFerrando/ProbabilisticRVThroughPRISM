@@ -86,21 +86,21 @@ class Monitor:
                         file.write(tr + ' ' + tp[0] + ' ' + str(tp[1]) + '\n')
     def next(self, event, simulated=False):
         # event = set(['event_' + e for e in event])
-        print('EVENT:', event)
+        # print('EVENT:', event)
         # print(self.__transitions[self.__initial_state])
         new_initial_states = set(self.__initial_states)
         for initial_state in self.__initial_states:
-            print('Move from state ', initial_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[initial_state]]),' } hold')
+            # print('Move from state ', initial_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[initial_state]]),' } hold')
             for ev in self.__transitions[initial_state]:
-                print('EV:', set([e for e in ev.split(',') if '=0' not in e]))
-                if simulated or event == set([e for e in ev.split(',') if '=0' not in e]):
+                # print('EV:', set([e for e in ev.split(',') if '=0' not in e]))
+                if simulated or event == set([e for e in ev.split(',')]):
                     simulated = False
                     new_initial_states.remove(initial_state)
                     next_states = copy.deepcopy(self.__transitions[initial_state][ev])
                     print(next_states)
                     for (next_state, prob) in next_states:
 #                        print(next_state,prob)
-                        print('To the state ', next_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[next_state]]),' } hold')
+                        # print('To the state ', next_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[next_state]]),' } hold')
                         self.__transitions[initial_state][ev].remove((next_state, prob))
 
                         self.__transitions[initial_state][ev].add((next_state, 1.0))
