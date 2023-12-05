@@ -37,4 +37,13 @@ where:
 - minTrace, maxTrace and stepTrace are parameters that guide the generation of randomly generated traces of events of size T, with minTrace <= T <= maxTrace.
 - numRepetitions denotes how many times each run has to be repeated; the computed time is the average of such runs. This parameter is used to reduce the impact of the noice introduced by the machine (e.g., other processes running on the machine that could slow down one specific execution).
 
+The results of the experiments will be stored inside the experiments folder.
+In the following, we report the plots resulting from running our tool on the synthetic experiments presented in paper.
+
+![Monitor Synthesis Time plot](./experiments/monitor_synthesis_time.png)
+![Monitor Verification Time plot w.r.t Trace length](./experiments/monitor_execution_time_all.png)
+![Monitor Verification Time per Event plot w.r.t Trace length](./experiments/monitor_execution_time_per_event_all.png)
+![Monitor Verification Time plot w.r.t Model size](./experiments/monitor_execution_time_per_trace_all.png)
+![Monitor Verification Time per event plot w.r.t Model size](./experiments/monitor_execution_time_per_trace_per_event_all.png)
+
 
