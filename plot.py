@@ -62,7 +62,7 @@ def plot_monitor_time_per_trace(df):
     fig.update_layout(
         xaxis_title="Model size [number of states/transitions/labels]",
         yaxis_title="Time [seconds]",
-        title="Monitor Execution Time (per event)",
+        title="Monitor Execution Time",
         legend=dict(orientation="v", yanchor="middle", y=0.5, xanchor="right", x=1.25),  # Legend on the right
         template="plotly_white",  # Use a white background template
         font=dict(size=18)
