@@ -20,7 +20,7 @@ def plot_monitor_synthesis_time(df):
         template="plotly_white",  # Use a white background template
         font=dict(size=18)
     )
-    fig.write_image('./monitor_synthesis_time.png')
+    fig.write_image('./experiments/monitor_synthesis_time.png')
 
 def plot_monitor_time_per_trace(df):
     fig = go.Figure()
@@ -69,7 +69,7 @@ def plot_monitor_time_per_trace(df):
     )
 
     # Save plot to file
-    fig.write_image('./monitor_execution_time_per_trace_all.png')
+    fig.write_image('./experiments/monitor_execution_time_per_trace_all.png')
 
 def plot_monitor_time_per_event_per_trace(df):
     fig = go.Figure()
@@ -119,7 +119,7 @@ def plot_monitor_time_per_event_per_trace(df):
     )
 
     # Save plot to file
-    fig.write_image('./monitor_execution_time_per_trace_per_event_all.png')
+    fig.write_image('./experiments/monitor_execution_time_per_trace_per_event_all.png')
 
 def plot_monitor_execution_time(df):
     fig = go.Figure()
@@ -168,7 +168,7 @@ def plot_monitor_execution_time(df):
     )
 
     # Save plot to file
-    fig.write_image('./monitor_execution_time_all.png')
+    fig.write_image('./experiments/monitor_execution_time_all.png')
 
 def plot_monitor_execution_time_per_event(df):
     fig = go.Figure()
@@ -217,4 +217,4 @@ def plot_monitor_execution_time_per_event(df):
     )
 
     # Save plot to file
-    fig.write_image('./monitor_execution_time_per_event_all.png')
+    fig.write_image('./experiments/monitor_execution_time_per_event_all.png')

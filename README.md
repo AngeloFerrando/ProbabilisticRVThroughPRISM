@@ -3,6 +3,7 @@
 This tool allows to perform Runtime Verification of PCTL properties w.r.t. a DTMC model specified in either PRISM or Bigraph format.
 
 ## To install
+- Python 3 (https://www.python.org/)
 - PRISM model checker (https://www.prismmodelchecker.org/)
 - STORM model checker (https://www.stormchecker.org/)
 - BIGRAPHER (https://www.dcs.gla.ac.uk/~michele/bigrapher.html)
