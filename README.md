@@ -41,6 +41,7 @@ The results of the experiments will be stored inside the experiments folder.
 In the following, we report the plots resulting from running our tool on the synthetic experiments presented in paper.
 
 ![Monitor Synthesis Time plot](./experiments/monitor_synthesis_time.png)
+![Monitor Synthesis Space plot](./experiments/monitor_synthesis_space.png)
 ![Monitor Verification Time plot w.r.t Trace length](./experiments/monitor_execution_time_all.png)
 ![Monitor Verification Time per Event plot w.r.t Trace length](./experiments/monitor_execution_time_per_event_all.png)
 ![Monitor Verification Time plot w.r.t Model size](./experiments/monitor_execution_time_per_trace_all.png)

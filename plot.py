@@ -22,6 +22,25 @@ def plot_monitor_synthesis_time(df):
     )
     fig.write_image('./experiments/monitor_synthesis_time.png')
 
+def plot_monitor_synthesis_space(df):
+    fig = px.line(
+        data_frame=df.groupby(['model_size']).mean().reset_index(), 
+        x="model_size", 
+        y="model_memory_usage [KiB]",
+        title="Monitor Memory Usage"
+    )
+    # Update layout with improved settings
+    fig.update_layout(
+        xaxis_title="Model size [number of states/transitions/labels]",
+        yaxis_title="Memory [KiB]",
+        title="Monitor Memory Usage",
+        legend=dict(orientation="v", yanchor="middle", y=0.5, xanchor="right", x=1.25),  # Legend on the right
+        template="plotly_white",  # Use a white background template
+        font=dict(size=18)
+    )
+    fig.write_image('./experiments/monitor_synthesis_space.png')
+
+
 def plot_monitor_time_per_trace(df):
     fig = go.Figure()
 

@@ -1,7 +1,9 @@
 import copy
 import os
+import sys
 
 class Monitor:
+    
     def __init__(self, file_states, file_transitions, file_labels, file_properties, storm):
         self.__state_vars = []
         self.__states = {}
@@ -116,14 +118,14 @@ class Monitor:
         self.to_files('tmp.sta', 'tmp.tra')
         if self.__kind == 'prism':
             if self.__storm:
-                os.system('./prismlab_to_stormlab.sh {file_labels} {file_labels_storm}'.format(file_labels=self.__file_labels, file_labels_storm=self.__file_labels.replace('.lab', '_storm.lab')))
-                os.system('./prismtra_to_stormtra.sh tmp.tra tmp_storm.tra')
-                result = os.popen('storm --explicit tmp_storm.tra {file_labels} --prop {csl}'.format(file_labels=self.__file_labels.replace('.lab', '_storm.lab'), csl=self.__file_properties)).read()
+                os.system('./prismlab_to_stormlab.sh {file_labels} {file_labels_storm}'.format(file_labels=self.__file_labels, file_labels_storm=self.__file_labels.replace('.lab', '_storm.lab')) + ' > /dev/null')
+                os.system('./prismtra_to_stormtra.sh tmp.tra tmp_storm.tra' + ' > /dev/null')
+                result = self.call_quiet(os.popen, 'storm --explicit tmp_storm.tra {file_labels} --prop {csl}'.format(file_labels=self.__file_labels.replace('.lab', '_storm.lab'), csl=self.__file_properties)).read()
             else:
-                result = os.popen('prism -importtrans tmp.tra -importstates tmp.sta -importlabels {file_labels} {csl} -dtmc'.format(file_labels=self.__file_labels, csl=self.__file_properties)).read()
+                result = self.call_quiet(os.popen, 'prism -importtrans tmp.tra -importstates tmp.sta -importlabels {file_labels} {csl} -dtmc'.format(file_labels=self.__file_labels, csl=self.__file_properties)).read()
         else:
-            result = os.popen('prism -importtrans tmp.tra {csl} -dtmc'.format(csl=self.__file_properties)).read()
-        print(result)
+            result = self.call_quiet(os.popen, 'prism -importtrans tmp.tra {csl} -dtmc'.format(csl=self.__file_properties)).read()
+        # print(result)
         if self.__storm:
             return float(result[result.index('Result (for initial states)')+28:result.index('Time for model checking')])
         else:
@@ -131,6 +133,13 @@ class Monitor:
     def simulated_next(self, trace_length):
         for i in range(0, trace_length):
             self.next('None', simulated=True)
+    def call_quiet(self, func, *args, **kwargs):
+        with open(os.devnull, 'w') as devnull:
+            sys.stdout, sys.stderr = devnull, devnull
+            try:
+                return func(*args, **kwargs)
+            finally:
+                sys.stdout, sys.stderr = sys.__stdout__, sys.__stderr__
 
 
                 
