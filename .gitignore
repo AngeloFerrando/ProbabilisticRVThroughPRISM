@@ -182,3 +182,6 @@ meta_model.prism
 meta_model.sta
 meta_model.tra
 meta_model_instr.prism
+
+.vscode
+.vscode/*

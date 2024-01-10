@@ -1,0 +1,1 @@
+navigateToNextWaypoint=1

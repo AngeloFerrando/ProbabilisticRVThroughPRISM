@@ -87,9 +87,7 @@ class Monitor:
                     for tp in self.__transitions[tr][ev]:
                         file.write(tr + ' ' + tp[0] + ' ' + str(tp[1]) + '\n')
     def next(self, event, simulated=False):
-        # event = set(['event_' + e for e in event])
         # print('EVENT:', event)
-        # print(self.__transitions[self.__initial_state])
         new_initial_states = set(self.__initial_states)
         for initial_state in self.__initial_states:
             # print('Move from state ', initial_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[initial_state]]),' } hold')
@@ -99,9 +97,8 @@ class Monitor:
                     simulated = False
                     new_initial_states.remove(initial_state)
                     next_states = copy.deepcopy(self.__transitions[initial_state][ev])
-                    print(next_states)
+                    # print(next_states)
                     for (next_state, prob) in next_states:
-#                        print(next_state,prob)
                         # print('To the state ', next_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[next_state]]),' } hold')
                         self.__transitions[initial_state][ev].remove((next_state, prob))
 
@@ -126,10 +123,18 @@ class Monitor:
         else:
             result = self.call_quiet(os.popen, 'prism -importtrans tmp.tra {csl} -dtmc'.format(csl=self.__file_properties)).read()
         # print(result)
-        if self.__storm:
-            return float(result[result.index('Result (for initial states)')+28:result.index('Time for model checking')])
+        if self.__storm and self.__kind == 'prism':
+            res = result[result.index('Result (for initial states)')+28:result.index('Time for model checking')].replace('\n', '').strip()
+            if res == 'true' or res == 'false':
+                return bool(res)
+            else:
+                return float(res)
+            
         else:
-            return float(result[result.index('Result:')+8:result.index('(exact floating point)')])
+            if '(exact floating point)' in result:
+                return float(result[result.index('Result:')+8:result.index('(exact floating point)')])
+            else:
+                return True if 'Result: true' in result else False
     def simulated_next(self, trace_length):
         for i in range(0, trace_length):
             self.next('None', simulated=True)

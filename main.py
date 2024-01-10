@@ -34,7 +34,7 @@ def main():
         os.system('prism ' +  model_file.replace('.prism', '_instr.prism') + ' -exportstates ' +  model_file.replace('.prism', '_instr.sta') + ' -exporttrans ' +  model_file.replace('.prism', '_instr.tra') + ' -exportlabels ' +  model_file.replace('.prism', '_instr.lab') + ' > /dev/null')
         monitor = Monitor( model_file.replace('.prism', '_instr.sta'),  model_file.replace('.prism', '_instr.tra'),  model_file.replace('.prism', '_instr.lab'),  pctl_file, storm)  
     else:
-        os.system('bigrapher/bigrapher full -p ' +  model_file.replace('.big', '.tra') + ' -l ' +  model_file.replace('.big', '.csl') + ' --solver=MCARD -M 5000 ' +  model_file + ' > /dev/null')
+        os.system('bigrapher full -p ' +  model_file.replace('.big', '.tra') + ' -l ' +  model_file.replace('.big', '.csl') + ' --solver=MCARD -M 5000 ' +  model_file + ' > /dev/null')
         with open(pctl_file, 'r') as file:
             prop = file.read()
         with open( model_file.replace('.big', '.csl'), 'a') as file:
@@ -45,7 +45,7 @@ def main():
         for line in file.readlines():
             line = line.replace('\n', '')
             print('EVENT:', line)
-            print('PROBABILITY:', monitor.next(set(line.split(','))))
+            print('RESULT:', monitor.next(set(line.split(','))))
 
 if __name__ == "__main__":
     main()

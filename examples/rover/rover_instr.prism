@@ -1,0 +1,29 @@
+dtmc
+
+module rover
+  nominalOperation:[0..1] init 0;
+  navigateToNextWaypoint:[0..1] init 0;
+  navigateToSafeSpace:[0..1] init 1;
+  abort:[0..1] init 0;
+  performMaintenance:[0..1] init 0;
+	maintainanceOrAbort1: [0..1] init 0;
+	maintainanceOrAbort2: [0..1] init 0;
+	initialNavigationStep: [0..1] init 0;
+
+	[maintainanceOrAbort1] navigateToNextWaypoint =1 ->  
+    0.95 :(performMaintenance' =1) 
+    & (navigateToNextWaypoint' = 0) & (maintainanceOrAbort1'=1) & (maintainanceOrAbort2'=0) & (initialNavigationStep'=0) +  0.05 :(abort' = 1) 
+    & (navigateToNextWaypoint' = 0) & (maintainanceOrAbort1'=1) & (maintainanceOrAbort2'=0) & (initialNavigationStep'=0);
+
+	[maintainanceOrAbort2] navigateToSafeSpace =1 ->  
+    0.9 :(performMaintenance' =1) 
+    & (navigateToSafeSpace' = 0) & (maintainanceOrAbort1'=0) & (maintainanceOrAbort2'=1) & (initialNavigationStep'=0) +  0.1 :(abort' = 1) 
+    & (navigateToSafeSpace' = 0) & (maintainanceOrAbort1'=0) & (maintainanceOrAbort2'=1) & (initialNavigationStep'=0);
+
+	[initialNavigationStep] nominalOperation =1 ->  
+    0.8 :(navigateToNextWaypoint' =1) 
+    & (nominalOperation' = 0) & (maintainanceOrAbort1'=0) & (maintainanceOrAbort2'=0) & (initialNavigationStep'=1) +  0.2 :(navigateToSafeSpace' = 1) 
+    & (nominalOperation' = 0) & (maintainanceOrAbort1'=0) & (maintainanceOrAbort2'=0) & (initialNavigationStep'=1);
+
+endmodule
+

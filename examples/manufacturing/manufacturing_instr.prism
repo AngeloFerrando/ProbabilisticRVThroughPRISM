@@ -4,27 +4,27 @@ module event_selection
 
 	status_product_1: [0..3] init 0;
 	status_product_2: [0..3] init 0;
-	update_success_product_1: [0..1] init 0;
 	choose_product1: [0..1] init 0;
-	update_failure_product_2: [0..1] init 0;
 	update_failure_product_1: [0..1] init 0;
-	update_success_product_2: [0..1] init 0;
 	choose_between_product1_and_product2: [0..1] init 0;
+	update_success_product_2: [0..1] init 0;
+	update_success_product_1: [0..1] init 0;
+	update_failure_product_2: [0..1] init 0;
 	choose_product2: [0..1] init 0;
 
-	[update_success_product_1] action_effect_product_1=1 & status_product_1=1 -> (status_product_1'=2) & (update_success_product_1'=1) & (choose_product1'=0) & (update_failure_product_2'=0) & (update_failure_product_1'=0) & (update_success_product_2'=0) & (choose_between_product1_and_product2'=0) & (choose_product2'=0);
+	[choose_product1] status_product_1=0 & (status_product_2=1 | status_product_2=2 | status_product_2=3) -> (status_product_1'=1) & (choose_product1'=1) & (update_failure_product_1'=0) & (choose_between_product1_and_product2'=0) & (update_success_product_2'=0) & (update_success_product_1'=0) & (update_failure_product_2'=0) & (choose_product2'=0);
 
-	[choose_product1] status_product_1=0 & (status_product_2=1 | status_product_2=2 | status_product_2=3) -> (status_product_1'=1) & (update_success_product_1'=0) & (choose_product1'=1) & (update_failure_product_2'=0) & (update_failure_product_1'=0) & (update_success_product_2'=0) & (choose_between_product1_and_product2'=0) & (choose_product2'=0);
+	[update_failure_product_1] action_effect_product_1=2 & status_product_1=1 -> (status_product_1'=3) & (choose_product1'=0) & (update_failure_product_1'=1) & (choose_between_product1_and_product2'=0) & (update_success_product_2'=0) & (update_success_product_1'=0) & (update_failure_product_2'=0) & (choose_product2'=0);
 
-	[update_failure_product_2] action_effect_product_2=2 & status_product_2=1 -> (status_product_2'=3) & (update_success_product_1'=0) & (choose_product1'=0) & (update_failure_product_2'=1) & (update_failure_product_1'=0) & (update_success_product_2'=0) & (choose_between_product1_and_product2'=0) & (choose_product2'=0);
+	[choose_between_product1_and_product2] status_product_1=0 & status_product_2=0 ->  0.4:(status_product_1'=1) & (choose_product1'=0) & (update_failure_product_1'=0) & (choose_between_product1_and_product2'=1) & (update_success_product_2'=0) & (update_success_product_1'=0) & (update_failure_product_2'=0) & (choose_product2'=0) +  0.6:(status_product_2'=1) & (choose_product1'=0) & (update_failure_product_1'=0) & (choose_between_product1_and_product2'=1) & (update_success_product_2'=0) & (update_success_product_1'=0) & (update_failure_product_2'=0) & (choose_product2'=0);
 
-	[update_failure_product_1] action_effect_product_1=2 & status_product_1=1 -> (status_product_1'=3) & (update_success_product_1'=0) & (choose_product1'=0) & (update_failure_product_2'=0) & (update_failure_product_1'=1) & (update_success_product_2'=0) & (choose_between_product1_and_product2'=0) & (choose_product2'=0);
+	[update_success_product_2] action_effect_product_2=1 & status_product_2=1 -> (status_product_2'=2) & (choose_product1'=0) & (update_failure_product_1'=0) & (choose_between_product1_and_product2'=0) & (update_success_product_2'=1) & (update_success_product_1'=0) & (update_failure_product_2'=0) & (choose_product2'=0);
 
-	[update_success_product_2] action_effect_product_2=1 & status_product_2=1 -> (status_product_2'=2) & (update_success_product_1'=0) & (choose_product1'=0) & (update_failure_product_2'=0) & (update_failure_product_1'=0) & (update_success_product_2'=1) & (choose_between_product1_and_product2'=0) & (choose_product2'=0);
+	[update_success_product_1] action_effect_product_1=1 & status_product_1=1 -> (status_product_1'=2) & (choose_product1'=0) & (update_failure_product_1'=0) & (choose_between_product1_and_product2'=0) & (update_success_product_2'=0) & (update_success_product_1'=1) & (update_failure_product_2'=0) & (choose_product2'=0);
 
-	[choose_between_product1_and_product2] status_product_1=0 & status_product_2=0 ->  0.4:(status_product_1'=1) & (update_success_product_1'=0) & (choose_product1'=0) & (update_failure_product_2'=0) & (update_failure_product_1'=0) & (update_success_product_2'=0) & (choose_between_product1_and_product2'=1) & (choose_product2'=0) +  0.6:(status_product_2'=1) & (update_success_product_1'=0) & (choose_product1'=0) & (update_failure_product_2'=0) & (update_failure_product_1'=0) & (update_success_product_2'=0) & (choose_between_product1_and_product2'=1) & (choose_product2'=0);
+	[update_failure_product_2] action_effect_product_2=2 & status_product_2=1 -> (status_product_2'=3) & (choose_product1'=0) & (update_failure_product_1'=0) & (choose_between_product1_and_product2'=0) & (update_success_product_2'=0) & (update_success_product_1'=0) & (update_failure_product_2'=1) & (choose_product2'=0);
 
-	[choose_product2] (status_product_1=1 | status_product_1=2 | status_product_1=3) & status_product_2=0 -> (status_product_2'=1) & (update_success_product_1'=0) & (choose_product1'=0) & (update_failure_product_2'=0) & (update_failure_product_1'=0) & (update_success_product_2'=0) & (choose_between_product1_and_product2'=0) & (choose_product2'=1);
+	[choose_product2] (status_product_1=1 | status_product_1=2 | status_product_1=3) & status_product_2=0 -> (status_product_2'=1) & (choose_product1'=0) & (update_failure_product_1'=0) & (choose_between_product1_and_product2'=0) & (update_success_product_2'=0) & (update_success_product_1'=0) & (update_failure_product_2'=0) & (choose_product2'=1);
 
 endmodule
 
@@ -45,18 +45,18 @@ module action_execution
 
 	action_effect_product_1: [0..2] init 0;
 	action_effect_product_2: [0..2] init 0;
-	action_product_2_expensive_bag: [0..1] init 0;
-	action_product_1_cheap_bag: [0..1] init 0;
 	action_product_2_cheap_bag: [0..1] init 0;
+	action_product_1_cheap_bag: [0..1] init 0;
+	action_product_2_expensive_bag: [0..1] init 0;
 	action_product_1_expensive_bag: [0..1] init 0;
 
-	[action_product_2_expensive_bag]     plan_product_2=2 & action_effect_product_2=0 ->  0.97:(action_effect_product_2'=1) & (action_product_2_expensive_bag'=1) & (action_product_1_cheap_bag'=0) & (action_product_2_cheap_bag'=0) & (action_product_1_expensive_bag'=0) +  0.03:(action_effect_product_2'=2) & (action_product_2_expensive_bag'=1) & (action_product_1_cheap_bag'=0) & (action_product_2_cheap_bag'=0) & (action_product_1_expensive_bag'=0);
+	[action_product_2_cheap_bag]         plan_product_2=1 & action_effect_product_2=0 ->  0.85:(action_effect_product_2'=1) & (action_product_2_cheap_bag'=1) & (action_product_1_cheap_bag'=0) & (action_product_2_expensive_bag'=0) & (action_product_1_expensive_bag'=0) +  0.15:(action_effect_product_2'=2) & (action_product_2_cheap_bag'=1) & (action_product_1_cheap_bag'=0) & (action_product_2_expensive_bag'=0) & (action_product_1_expensive_bag'=0);
 
-	[action_product_1_cheap_bag]         plan_product_1=1 & action_effect_product_1=0 ->  0.8:(action_effect_product_1'=1) & (action_product_2_expensive_bag'=0) & (action_product_1_cheap_bag'=1) & (action_product_2_cheap_bag'=0) & (action_product_1_expensive_bag'=0) +  0.2:(action_effect_product_1'=2) & (action_product_2_expensive_bag'=0) & (action_product_1_cheap_bag'=1) & (action_product_2_cheap_bag'=0) & (action_product_1_expensive_bag'=0);
+	[action_product_1_cheap_bag]         plan_product_1=1 & action_effect_product_1=0 ->  0.8:(action_effect_product_1'=1) & (action_product_2_cheap_bag'=0) & (action_product_1_cheap_bag'=1) & (action_product_2_expensive_bag'=0) & (action_product_1_expensive_bag'=0) +  0.2:(action_effect_product_1'=2) & (action_product_2_cheap_bag'=0) & (action_product_1_cheap_bag'=1) & (action_product_2_expensive_bag'=0) & (action_product_1_expensive_bag'=0);
 
-	[action_product_2_cheap_bag]         plan_product_2=1 & action_effect_product_2=0 ->  0.85:(action_effect_product_2'=1) & (action_product_2_expensive_bag'=0) & (action_product_1_cheap_bag'=0) & (action_product_2_cheap_bag'=1) & (action_product_1_expensive_bag'=0) +  0.15:(action_effect_product_2'=2) & (action_product_2_expensive_bag'=0) & (action_product_1_cheap_bag'=0) & (action_product_2_cheap_bag'=1) & (action_product_1_expensive_bag'=0);
+	[action_product_2_expensive_bag]     plan_product_2=2 & action_effect_product_2=0 ->  0.97:(action_effect_product_2'=1) & (action_product_2_cheap_bag'=0) & (action_product_1_cheap_bag'=0) & (action_product_2_expensive_bag'=1) & (action_product_1_expensive_bag'=0) +  0.03:(action_effect_product_2'=2) & (action_product_2_cheap_bag'=0) & (action_product_1_cheap_bag'=0) & (action_product_2_expensive_bag'=1) & (action_product_1_expensive_bag'=0);
 
-	[action_product_1_expensive_bag]     plan_product_1=2 & action_effect_product_1=0 ->  0.95:(action_effect_product_1'=1) & (action_product_2_expensive_bag'=0) & (action_product_1_cheap_bag'=0) & (action_product_2_cheap_bag'=0) & (action_product_1_expensive_bag'=1) +  0.05:(action_effect_product_1'=2) & (action_product_2_expensive_bag'=0) & (action_product_1_cheap_bag'=0) & (action_product_2_cheap_bag'=0) & (action_product_1_expensive_bag'=1);
+	[action_product_1_expensive_bag]     plan_product_1=2 & action_effect_product_1=0 ->  0.95:(action_effect_product_1'=1) & (action_product_2_cheap_bag'=0) & (action_product_1_cheap_bag'=0) & (action_product_2_expensive_bag'=0) & (action_product_1_expensive_bag'=1) +  0.05:(action_effect_product_1'=2) & (action_product_2_cheap_bag'=0) & (action_product_1_cheap_bag'=0) & (action_product_2_expensive_bag'=0) & (action_product_1_expensive_bag'=1);
 
 endmodule
 
