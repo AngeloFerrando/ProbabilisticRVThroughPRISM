@@ -46,6 +46,7 @@ def main():
             line = line.replace('\n', '')
             print('EVENT:', line)
             print('RESULT:', monitor.next(set(line.split(','))))
+    # print('RESULT:', monitor.simulated_next(5))#set(line.split(','))))
 
 if __name__ == "__main__":
     main()

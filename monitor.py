@@ -12,6 +12,8 @@ class Monitor:
         self.__file_properties = file_properties
         self.__initial_states = set(['0'])
         self.__storm = storm
+        self.__fresh = None
+        self.__states_to_make_fresh = None
         if file_states: # PRISM
             self.__kind = 'prism'
             # extract the atomic propositions that hold in states from the STA file
@@ -63,7 +65,45 @@ class Monitor:
                         self.__transitions[line[0]][','.join([e + '=' + v for (e,v) in self.__states[line[1]]])] = set()
                     # the non-determinism is only for the empty event (the events of our interest are deterministic w.r.t. the next state where they move to)
                     self.__transitions[line[0]][','.join([e + '=' + v for (e,v) in self.__states[line[1]]])].add((line[1], float(line[2])))
-            print(self.__transitions['0'])
+        self.__fresh = copy.deepcopy(self)
+        loops = self.find_loops()
+        self.__states_to_make_fresh = self.find_states_to_make_fresh(loops)
+    # find all the loops (i.e., the states where a refresh will have to be performed at runtime)
+    def find_loops(self):
+        visited = set()
+        loops = set()
+        for state in self.__initial_states:
+            self.find_loops_aux(state, visited, loops)
+        return loops
+    def find_loops_aux(self, state, visited, loops):
+        if state in visited:
+            loops.add(state)
+        else:
+            visited.add(state)
+            for ev in self.__transitions[state]:
+                for tp in self.__transitions[state][ev]:
+                    self.find_loops_aux(tp[0], visited, loops)
+            visited.remove(state)
+    # find the states to make fresh when are found at runtime
+    def find_states_to_make_fresh(self, loops):
+        to_make_fresh = {}
+        for loop in loops:
+            states = set()
+            visited = set()
+            states.add(loop)
+            while(states):
+                state = states.pop()
+                if state in visited:
+                    continue
+                visited.add(state)
+                for ev in self.__transitions[state]:
+                    for tp in self.__transitions[state][ev]:
+                        states.add(tp[0])
+            to_make_fresh[loop] = visited
+        return to_make_fresh
+    def make_state_fresh(self, state):
+        for not_fresh in self.__states_to_make_fresh[state]:
+            self.__transitions[not_fresh] = copy.deepcopy(self.__fresh.__transitions[not_fresh])
     # generate state and transition files from the monitor (the state file is only generated in case of PRISM)
     def to_files(self, file_states, file_transitions):
         if self.__kind == 'prism':
@@ -93,6 +133,9 @@ class Monitor:
             # print('Move from state ', initial_state, ' where the atoms { ', ','.join([str(e[0]) for e in self.__states[initial_state]]),' } hold')
             for ev in self.__transitions[initial_state]:
                 # print('EV:', set([e for e in ev.split(',') if '=0' not in e]))
+                if event == 'None':
+                    event = set()
+                    event.add('None')
                 if simulated or event == set([e for e in ev.split(',')]):
                     simulated = False
                     new_initial_states.remove(initial_state)
@@ -110,6 +153,10 @@ class Monitor:
                         self.__transitions[initial_state][ev].remove((aux, prob))
                         self.__transitions[initial_state][ev].add((aux, 0.0))
         self.__initial_states = new_initial_states
+        # refresh
+        for state in self.__initial_states:
+            if state in self.__states_to_make_fresh:
+                self.make_state_fresh(state)
         return self.check()
     def check(self):
         self.to_files('tmp.sta', 'tmp.tra')
